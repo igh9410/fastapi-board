@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from sqlalchemy.orm import relationship
 from app.db import Base
 
 class User(Base):
@@ -11,3 +10,6 @@ class User(Base):
     fullname = Column(String, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+
+    class Config:
+        orm_mode = True
