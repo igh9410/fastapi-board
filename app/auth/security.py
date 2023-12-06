@@ -1,29 +1,31 @@
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials
-import jwt
-from passlib.context import CryptContext
-from app.config import settings
+from fastapi import HTTPException, Request
+from app.auth.models import User
+from . import crud
+from .utils import verify_password
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from app.redis import redis_client
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+async def get_current_user(request: Request) -> str:
+    current_session_token = request.cookies.get("session_token")
+    if not current_session_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    current_user_id_bytes = redis_client.get(current_session_token) # get user id from redis
+    if current_user_id_bytes is not None:
+        current_user_id = current_user_id_bytes.decode('utf-8')  # Convert byte string to a regular string
+    else:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return current_user_id
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
-async def get_current_user(authorization: HTTPAuthorizationCredentials = Depends(settings.SECURITY)) -> str:
-    try:
-        token = authorization.credentials
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])     
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.PyJWTError as e:
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Error with the token provided")
-    
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token payload")
-    return user_id
+
+def authenticate_user(db:Session, email: str, password: str):   
+    user = crud.get_user_by_email(db, email)
+    if not user or verify_password(password, user.password) == False:
+        return False
+    return user
+

@@ -1,11 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from .security import get_password_hash
+from .utils import get_password_hash
 from .models import User
 from .schemas import UserCreate
 
 
-def create_user(db: Session, user: UserCreate):
+def create_user(db: Session, user: UserCreate) -> User:
     db_user = User(
         fullname=user.fullname,
         email=user.email,
@@ -16,7 +16,7 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
-def get_user_by_email(db: Session, email: str):
+def get_user_by_email(db: Session, email: str) -> User:
     query = select(User).where(User.email == email)
     result = db.execute(query).scalars().first()
     return result

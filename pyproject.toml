@@ -18,6 +18,9 @@ pydantic = {extras = ["email"], version = "^2.5.2"}
 pyjwt = "^2.8.0"
 python-multipart = "^0.0.6"
 redis = "^5.0.1"
+fastapi-middleware = "^0.1.0"
+itsdangerous = "^2.1.2"
+pytz = "^2023.3.post1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.4.3"
