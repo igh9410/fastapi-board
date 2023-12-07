@@ -1,0 +1,41 @@
+version: "3"
+services:
+  fastapi:
+    container_name: fastapi_board_test
+    ports:
+      - "8001:8000" # Different port to avoid conflict with the development environment
+    image: fastapi_board:v1
+    environment:
+      - DATABASE_URL=postgresql://test_user:test_password@postgres_test:5432/test_db
+      - REDIS_URL=redis://redis_test:6379
+      - SESSION_SECRET=test_secret_key
+    networks:
+      - fastapi_board_test_network
+
+  postgres_test:
+    container_name: fastapi_board_postgres_test
+    image: postgres:15.5-alpine
+    environment:
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+    ports:
+      - "127.0.0.1:26000:5432"
+    networks:
+      - fastapi_board_test_network
+
+  redis_test:
+    container_name: fastapi_board_redis_test
+    image: redis:7.2.3-alpine3.18
+    ports:
+      - "127.0.0.1:25300:6379"
+    command: redis-server --save ""
+    networks:
+      - fastapi_board_test_network
+networks:
+  fastapi_board_test_network:
+    driver: bridge
+
+volumes:
+  postgres-test-data:
+    driver: local
