@@ -29,7 +29,7 @@ class BoardCreate(BaseModel):
 
 class BoardUpdate(BaseModel):
     name: Optional[str] = None
-    public: Optional[str] = None
+    public: Optional[bool] = None
   
 
 class BoardList(BaseModel):

@@ -15,22 +15,19 @@ COPY pyproject.toml poetry.lock* /app/
 
 # Install dependencies without dev dependencies
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev
+RUN poetry install 
 
 # Copy the entire application
 COPY app /app/app
 
-# Test Stage
-FROM build-stage as run-test-stage
-
 # Copy test code
-COPY tests /tests
+COPY tests /app/tests
 
 # Install all dependencies including dev dependencies for running tests
 RUN poetry install
 
 # Run the tests
-RUN pytest /tests
+RUN pytest ./tests
 
 # Final Stage: Building the application
 FROM python:3.10-slim as build-release-stage
