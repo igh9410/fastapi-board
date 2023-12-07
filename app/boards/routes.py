@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.boards import models
 from app.auth.security import get_current_user
@@ -19,7 +19,7 @@ async def create_board_route(board: schemas.BoardCreate, db: Session = Depends(g
     
     
 
-async def update_board(id: UUID, board: schemas.BoardUpdate, db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user)) -> schemas.BoardUpdate:
+async def update_board_route(id: UUID, board: schemas.BoardUpdate, db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user)) -> schemas.BoardUpdate:
     user_uuid = UUID(current_user_id)
     
     updated_board = crud.update_board_crud(db=db, board_id=id, board=board, user_id=user_uuid)
@@ -46,15 +46,18 @@ async def get_board_route(id: UUID, db: Session = Depends(get_db), current_user_
 
     if isinstance(fetched_board, models.Board):
         # Successful creation, returning the response
-        response = schemas.BoardGet(name=fetched_board.name, public=fetched_board.public)    
+        response = schemas.BoardGet(id=fetched_board.id,name=fetched_board.name, public=fetched_board.public)    
         return response
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Board not found or retrieving not allowed") 
     
-async def get_board_list_route(db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user)) -> schemas.BoardList:
+async def get_board_list_route(page_number: int = Query(1, alias="page_number"),
+    page_size: int = Query(20, alias="page_size"), sort: bool = Query(False, alias="sort"), db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user)) -> schemas.BoardList: # if sort is true, sort by post counts in descending order
     user_uuid = UUID(current_user_id)
-    try:
-        board_list = crud.get_board_list_crud(db=db, user_id=user_uuid)
-        return board_list
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Board not found or retrieving not allowed") from e
+    board_list = crud.get_board_list_crud(db=db, user_id=user_uuid, sort=sort, page_number=page_number, page_size=page_size) # Set default page size to 20
+    
+    if isinstance(board_list, schemas.BoardList):
+       return board_list
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Boards not found or retrieving not allowed")
+    

@@ -1,4 +1,3 @@
-# First Stage: Installing dependencies
 FROM python:3.10 as build-stage
 
 WORKDIR /app
@@ -6,6 +5,7 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH /app
 
 # Install Poetry
 RUN pip install poetry
@@ -18,7 +18,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
 
 # Copy the entire application
-COPY app /app
+COPY app /app/app
 
 # Test Stage
 FROM build-stage as run-test-stage
@@ -45,4 +45,4 @@ COPY --from=build-stage /app /app
 EXPOSE 8000
 
 # Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

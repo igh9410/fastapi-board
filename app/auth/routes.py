@@ -14,7 +14,7 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-async def login(response: Response, login_request: LoginRequest, db: Session = Depends(get_db)) -> schemas.Token:  
+async def login(request: Request, response: Response, login_request: LoginRequest, db: Session = Depends(get_db)) -> schemas.Token:  
     user = authenticate_user(db, login_request.email, login_request.password)
 
     if not user:
@@ -22,15 +22,16 @@ async def login(response: Response, login_request: LoginRequest, db: Session = D
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
-    
-    existing_session_token = redis_client.get(str(user.id))
-    if existing_session_token:
-        return schemas.Token(access_token=existing_session_token) # if session token exists in redis, return it instead of creating a new one
+
+    existing_session_token = request.cookies.get("session_token") # get session token from cookies
+
+    if existing_session_token is not None: 
+        request.cookies.pop("session_token") # Removes session token from cookies
     
     session_token = create_unique_token()
-    redis_client.set(session_token, str(user.id)) # set session token in redis
+    redis_client.set(session_token, str(user.id), ex=604800) # set session token in redis, expiration time is 7 days
 
-    response.set_cookie(key="session_token", value=session_token, httponly=True, secure=True) 
+    response.set_cookie(key="session_token", value=session_token, expires=604800, httponly=True, secure=True) # Cookie expires after 7 days, httponly and secure flags are set
 
 
     return schemas.Token(access_token=session_token)

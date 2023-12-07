@@ -1,13 +1,18 @@
+import logging
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from starlette.middleware.sessions import SessionMiddleware
 from app.db import init_db
-from .router import router as app_router
+from app.router import router as app_router
 from app.config import settings
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
 app.include_router(app_router)
+
+logging.basicConfig(level=logging.INFO)
+
+
 
 load_dotenv() ## Load .env file
 

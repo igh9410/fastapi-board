@@ -1,16 +1,6 @@
-# docker-compose.yml
+# docker-compose-local.yml
 version: "3"
 services:
-  fastapi:
-    container_name: fastapi_board
-    ports:
-      - "8000:8000"
-    image: fastapi_board:v1
-    environment:
-      - DATABASE_URL=postgresql://developer:devpassword@postgres:5432/developer
-      - REDIS_URL=redis://redis:6379
-      - SESSION_SECRET=IdwJ9b6B9gBitU8HQc3-Lv5eN9XbC40qmdtmps7xDRY=
-
   postgres:
     container_name: fastapi_board_postgres
     image: postgres:15.5-alpine
