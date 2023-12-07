@@ -25,7 +25,7 @@ router.add_api_route("/api/boards", get_board_list_route, methods=["GET"], respo
 
 # Post Routes
 router.add_api_route("/api/boards/{board_id}/posts/", create_post_route, methods=["POST"], response_model=post_schemas.PostCreate, tags=["Posts"], status_code=status.HTTP_201_CREATED) # Create Post Route
-router.add_api_route("/api/boards/{board_id}/posts/{post_id}", update_post_route, methods=["PATCH"], response_model=post_schemas.PostUpdate, tags=["Boards"], status_code=status.HTTP_200_OK) # Update Post Route
-router.add_api_route("/api/boards/{board_id}/posts/{post_id}", delete_post_route, methods=["DELETE"], response_model=None, tags=["Boards"], status_code=status.HTTP_204_NO_CONTENT) # Delete Post Route
-router.add_api_route("/api/boards/{board_id}/posts/{post_id}", get_post_route, methods=["GET"], response_model=post_schemas.PostGet, tags=["Boards"], status_code=status.HTTP_200_OK) # Get Post Route
-router.add_api_route("/api/boards/{board_id}/posts", get_post_list_route, methods=["GET"], response_model=post_schemas.PostList, tags=["Boards"], status_code=status.HTTP_200_OK) # Get Post List Route
+router.add_api_route("/api/boards/{board_id}/posts/{post_id}", update_post_route, methods=["PATCH"], response_model=post_schemas.PostUpdate, tags=["Posts"], status_code=status.HTTP_200_OK) # Update Post Route
+router.add_api_route("/api/boards/{board_id}/posts/{post_id}", delete_post_route, methods=["DELETE"], response_model=None, tags=["Posts"], status_code=status.HTTP_204_NO_CONTENT) # Delete Post Route
+router.add_api_route("/api/boards/{board_id}/posts/{post_id}", get_post_route, methods=["GET"], response_model=post_schemas.PostGet, tags=["Posts"], status_code=status.HTTP_200_OK) # Get Post Route
+router.add_api_route("/api/boards/{board_id}/posts", get_post_list_route, methods=["GET"], response_model=post_schemas.PostList, tags=["Posts"], status_code=status.HTTP_200_OK) # Get Post List Route
