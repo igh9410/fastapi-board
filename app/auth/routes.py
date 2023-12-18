@@ -27,9 +27,10 @@ async def login(request: Request, response: Response, login_request: LoginReques
 
     if existing_session_token is not None: 
         request.cookies.pop("session_token") # Removes session token from cookies
+        redis_client.delete(existing_session_token) # Removes session token from Redis, prevent duplicate sessions
     
     session_token = create_unique_token()
-    redis_client.set(session_token, str(user.id), ex=604800) # set session token in redis, expiration time is 7 days
+    redis_client.set(session_token, str(user.id), ex=604800) # set session token in Redis, expiration time is 7 days
 
     response.set_cookie(key="session_token", value=session_token, expires=604800, httponly=True, secure=True) # Cookie expires after 7 days, httponly and secure flags are set
 
