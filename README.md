@@ -1,6 +1,5 @@
 # fastapi_board
 
-엘리스 과제
 
 ## 실행 방법
 
